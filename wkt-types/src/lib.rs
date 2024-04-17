@@ -17,3 +17,5 @@ pub use crate::pbmask::*;
 
 pub use prost_wkt::MessageSerde;
 
+#[cfg(feature = "uniffi")]
+uniffi::setup_scaffolding!();

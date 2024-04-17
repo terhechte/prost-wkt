@@ -20,6 +20,7 @@ default = ["std"]
 std = []
 vendored-protoc = ["protobuf-src"]
 vendored-protox = ["protox"]
+uniffi = ["dep:uniffi"]
 
 [dependencies]
 prost-wkt = { version = "0.5.1", path = ".." }
@@ -28,6 +29,7 @@ serde = "1.0"
 serde_json = "1.0"
 serde_derive = "1.0"
 chrono = { version = "0.4.27", default-features = false, features = ["serde"] }
+uniffi = { version = "0.27", optional = true }
 
 [build-dependencies]
 prost = "0.12.3"

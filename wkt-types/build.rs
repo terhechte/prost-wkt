@@ -11,14 +11,14 @@ fn main() {
 
     let dir = PathBuf::from(env::var("OUT_DIR").unwrap());
 
-    build(&dir, "pbtime");
-    build(&dir, "pbstruct");
-    build(&dir, "pbany");
-    build(&dir, "pbempty");
-    build(&dir, "pbmask");
+    build(&dir, "pbtime", true);
+    build(&dir, "pbstruct", false);
+    build(&dir, "pbany", false);
+    build(&dir, "pbempty", false);
+    build(&dir, "pbmask", false);
 }
 
-fn build(dir: &Path, proto: &str) {
+fn build(dir: &Path, proto: &str, include_uniffi: bool) {
     let out = dir.join(proto);
     create_dir_all(&out).unwrap();
     let source = format!("proto/{proto}.proto");
@@ -32,18 +32,26 @@ fn build(dir: &Path, proto: &str) {
         prost_build.skip_protoc_run();
     }
 
+    let uniffi_derive = if cfg!(feature = "uniffi") && include_uniffi {
+        "#[derive(uniffi::Record)]"
+    } else {
+        ""
+    };
+
     prost_build
         .compile_well_known_types()
-        .type_attribute("google.protobuf.Empty","#[derive(serde_derive::Serialize, serde_derive::Deserialize)]")
-        .type_attribute("google.protobuf.FieldMask","#[derive(serde_derive::Serialize, serde_derive::Deserialize)]")
+        .type_attribute(
+            "google.protobuf.Empty",
+            "#[derive(serde_derive::Serialize, serde_derive::Deserialize)]",
+        )
+        .type_attribute(
+            "google.protobuf.FieldMask",
+            "#[derive(serde_derive::Serialize, serde_derive::Deserialize)]",
+        )
+        .type_attribute(".", uniffi_derive)
         .file_descriptor_set_path(&descriptor_file)
         .out_dir(&out)
-        .compile_protos(
-            &[
-                source
-            ],
-            &["proto/".to_string()],
-        )
+        .compile_protos(&[source], &["proto/".to_string()])
         .unwrap();
 
     let descriptor_bytes = std::fs::read(descriptor_file).unwrap();

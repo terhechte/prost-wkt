@@ -93,3 +93,6 @@ pub struct MessageSerdeDecoderEntry {
 }
 
 inventory::collect!(MessageSerdeDecoderEntry);
+
+#[cfg(feature = "uniffi")]
+uniffi::setup_scaffolding!();
